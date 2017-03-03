@@ -12,7 +12,7 @@ Dependencies
     * PyQt5 >= 5.6
     * Pillow >= 4.0
     * picamera >= 1.12
-
+    * odML >= 1.2 
 
 Keyboard Shortcuts
 ------------------
