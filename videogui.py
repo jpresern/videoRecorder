@@ -21,7 +21,8 @@ from default_config import default_template, camera_device_search_range, camera_
 # from PIL import ImageQt as iqt
 # from nitime.index_utils import tri
 # from MetadataEntry import MetadataEntry
-__author__ = 'Joerg Henninger, Jan Grewe, Fabian Sinz, Janez Presern'
+
+__author__ = 'Joerg Henninger, Jan Grewe, Fabian Sinz, Lorand, Janez Presern'
 
 sys.path.append('../')
 

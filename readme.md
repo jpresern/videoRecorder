@@ -1,7 +1,21 @@
 # VideoRecorder
 
-Keyboard Shortcuts:
--------------------
+Dead simple video recorder, written in Python.
+
+
+Dependencies
+------------
+* Python >= 3.4 
+* Python packages
+    * Numpy >= 1.11
+    * OpenCV >= 3.0
+    * PyQt5 >= 5.6
+    * Pillow >= 4.0
+    * picamera >= 1.12
+
+
+Keyboard Shortcuts
+------------------
 * Quit Program: ESC # doesn't work properly
 * Starts/stops recording: ALT + Space
 * Adds tag: ALT + T # doesn't work properly
