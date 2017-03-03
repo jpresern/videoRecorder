@@ -360,7 +360,8 @@ class Main(QtWidgets.QMainWindow):
     def create_menu_bar(self):
         self.statusBar()
 
-        exit_action = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        # exit_action = QtWidgets.QAction(QtGui.QIcon('exit.png'), '&Exit', self)
+        exit_action = QtWidgets.QAction('&Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Exit application')
         exit_action.triggered.connect(QtWidgets.qApp.quit)
