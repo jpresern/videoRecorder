@@ -38,4 +38,4 @@ Important note
 --------------
 The code was ported from Python 2 and **no care** was taken to maintain compatibility. Time to move on.
 
-Should you disagree with the above statement, there is Py2/PyQt4 compatible version github.com/bendalab
+Should you disagree with the above statement, there is Py2/PyQt4 compatible version at github.com/bendalab
