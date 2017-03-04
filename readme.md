@@ -1,7 +1,7 @@
 # VideoRecorder
 
-Dead simple video recorder, written in Python.
-
+Dead simple video recorder, written in Python. It works both for USB webcams or RPi cameras, like NoIR.
+ 
 
 Dependencies
 ------------
@@ -33,3 +33,9 @@ Keyboard Shortcuts
 * -s --instant_start      -- start the recording instantly without user input
 * -i --idle_screen        -- do not display the video frames; this saves quite some computational power
 * -c --color              -- record in color
+
+Important note
+--------------
+The code was ported from Python 2 and **no care** was taken to maintain compatibility. Time to move on.
+
+Should you disagree with the above statement, there is Py2/PyQt4 compatible version github.com/bendalab
