@@ -395,9 +395,9 @@ class Main(QtWidgets.QMainWindow):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')
         if not os.path.isdir(path):
             path = os.path.abspath('.')
-        print("do tu")
-        file_name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open template', path, "XML files (*.xml *.odml)")
-        print("do tu")
+        # print("do tu")
+        file_name = QtWidgets.QFileDialog().getOpenFileName(self, 'Open template', path, "XML files (*.xml *.odml)")
+        # print("do tu")
         if file_name:
             self.populate_metadata_tab(file_name)
 
