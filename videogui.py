@@ -56,6 +56,7 @@ Keyboard Shortcuts:
 # TODO video-canvas: full screen does not work properly. why?
 # TODO validation of meta data tabs. Warn, if info is missing!
 # TODO: BW (gray scale) support now hacked via tripling the gray scale values to imitate RGB. Probably local codec issue
+# TODO: add sound?
 
 # ########################################
 
@@ -109,7 +110,7 @@ class Main(QtWidgets.QMainWindow):
         self.setGeometry(offset_left, offset_top, width, height)
         self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         self.setMinimumSize(width, height)
-        self.setWindowTitle('Bee Video GUI')
+        self.setWindowTitle('Video GUI')
 
         # #######################################
 
@@ -493,14 +494,14 @@ class Main(QtWidgets.QMainWindow):
         #                          for cam_name, cam in self.cameras.items()}
         print(self.video_recordings)
 
-        # drop timestamp for start or recording
+        """ drop timestamp for start or recording """
         trial_info_filename = '{0:s}/trial_{1:04d}_info.dat'.format(self.data_dir, self.trial_counter)
         self.start_time = datetime.now()
         timestamp = self.start_time.strftime("%Y-%m-%d  %H:%M:%S:%f")[:-3]
         with open(trial_info_filename, 'w') as f:
             f.write("start-time:" + "\t" + timestamp + "\n")
 
-        # display start time
+        """ display start time """
         time_label = 'start-time: {0:s}   ---  running: {1:s}'.format(timestamp, str(datetime.now() - self.start_time)[:-7])
         self.label_time.setText(time_label)
 
@@ -517,7 +518,7 @@ class Main(QtWidgets.QMainWindow):
                 self.trial_counter = np.amax([int(e.split('_')[1]) for e in [ee.split('.')[0] for ee in tmp]])+1
 
     def stop_all_recordings(self):
-        # drop timestamp for stop
+        """ drop timestamp for stop """
         trial_info_filename = '{0:s}/trial_{1:04d}_info.dat'.format(self.data_dir, self.trial_counter)
         with open(trial_info_filename, 'a') as f:
             timestamp = datetime.now().strftime("stop-time:" + "\t" + "%Y-%m-%d  %H:%M:%S:%f"[:-3])
@@ -565,14 +566,14 @@ class Main(QtWidgets.QMainWindow):
     def clicked_tag(self):
         ts = str(datetime.now()).split('.')[0]
         text, ok = QtWidgets.QInputDialog.getText(self, 'Tag data with Event', 'Enter tag comment:')
-        # write tags into .xml (odML) file
+        """ write tags into .xml (odML) file """
         if ok:
             tag_name = 'event_{0:02d}'.format(len(self.event_list))
             e = odml.Section(tag_name, 'event')
             e.append(odml.Property('timestamp', odml.Value(ts, dtype='datetime')))
             e.append(odml.Property('comment', odml.Value(text, dtype='string')))
             self.event_list.append(e)
-        # write tags into the .dat file as pure text
+        """ write tags into the .dat file as pure text """
         trial_info_filename = '{0:s}/trial_{1:04d}_info.dat'.format(self.data_dir, self.trial_counter)
         with open(trial_info_filename, 'a') as f:
             timestamp = datetime.now().strftime(("tag-time:" + "\t" + "%Y-%m-%d  %H:%M:%S:%f")[:-3] + "\t" + text)
@@ -600,9 +601,9 @@ class Main(QtWidgets.QMainWindow):
     def save_metadata(self):
         trial_name = 'trial_{0:04d}'.format(self.trial_counter)
         file_list = [f for f in os.listdir(self.data_dir) if f.startswith(trial_name)]
-        # create a document
+        """ create a document """
         doc = odml.Document()
-        # create dataset section
+        """ create dataset section """
         ds = odml.Section('datasets', 'dataset')
         p = odml.Property('files', None)
         ds.append(p)
@@ -666,12 +667,10 @@ class Main(QtWidgets.QMainWindow):
                     frame = bgr2rgb(frame)
                 img = QtGui.QImage(frame.data, frame.shape[1], frame.shape[0],
                                      frame.shape[1]*3, QtGui.QImage.Format_RGB888)
-                # self.video_tabs[cam_name].setImage(QtGui.QPixmap.fromImage(iqt.ImageQt(image.fromarray(frame))))
-                # self.video_tabs[cam_name].setImage(QtGui.QPixmap(QtGui.QImage(imago)))
                 self.video_tabs[cam_name].setImage(QtGui.QPixmap(img))
 
         if is_recording:
-            # display start time
+            """# display start time """
             timestamp = self.start_time.strftime("%Y-%m-%d  %H:%M:%S")
             time_label = 'start-time: {0:s}   ---  running: {1:s}'.format(timestamp, str(datetime.now() - self.start_time)[:-7])
             self.label_time.setText(time_label)
