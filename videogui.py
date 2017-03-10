@@ -469,6 +469,7 @@ class Main(QtWidgets.QMainWindow):
     def create_and_start_new_videorecordings(self):
         # @jan: could choose potentially from PIM1, MJPG, MP42, DIV3, DIVX, U263, I263, FLV1
         # works @ mac:  MJPG/.avi
+        # works @ mac:  mp4v/.mp4
         #
         # CV_FOURCC('P','I','M','1')    = MPEG-1 codec
         if self.trial_counter == 0:
@@ -476,11 +477,11 @@ class Main(QtWidgets.QMainWindow):
         #trial_name = '%s/trial_%04i' % (self.data_dir, self.trial_counter)
         trial_name = '{0:s}/trial_{1:04d}'.format(self.data_dir, self.trial_counter)
         self.tags = list()
-        self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.avi'.format(trial_name, cam_name),
+        self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
                                                            '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
                                                            cam.get_resolution(),
                                                            frames_per_second,
-                                                           'MJPG',
+                                                           'mp4v',
                                                            color=True)
                                             if not cam.is_raspicam() else
                                             RasPiVideoRecording('{0}_{1}.h264'.format(trial_name, cam_name),
