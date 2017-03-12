@@ -5,6 +5,7 @@ import os
 import glob
 import numpy as np
 from IPython import embed
+from collections import OrderedDict
 from optparse import OptionParser
 from datetime import date, datetime, timedelta
 from VideoRecording import VideoRecording
@@ -15,6 +16,7 @@ from RasPiCamControllerTab import RasPiCamControllerTab
 from Camera import Camera, bgr2rgb, bgr2grayscale
 from default_config import default_template, camera_device_search_range, camera_name_format, frames_per_second, \
     width, height, max_tab_width, min_tab_width, offset_left, offset_top
+from doc import doc
 
 
 # from PIL import Image as image
@@ -44,10 +46,12 @@ Keyboard Shortcuts:
 == OPTIONS ==
 -u --template           -- choose your template by its name
 -k --stop_time          -- define a stop time for your recording; Formats: "HH:MM:SS" and "YY-mm-dd HH:MM:SS"
+-l --recording_length   -- define recording length
 -o --output_directory   -- define the output directory of your recordings
 -s --instant_start      -- start the recording instantly without user input
 -i --idle_screen        -- do not display the video frames; this saves quite some computational power
 -c --color              -- record in color
+-e --segmentation       -- segment recording into short files; enter duration of segment. Format: "HH:MM:SS"
 '''
 
 # #######################################
@@ -58,15 +62,17 @@ Keyboard Shortcuts:
 # TODO: BW (gray scale) support now hacked via tripling the gray scale values to imitate RGB. Probably local codec issue
 # TODO: add sound?
 
+
 # ########################################
 
 try:
     from PyQt5 import QtGui, QtCore, QtWidgets
+    from PyQt5.QtCore import Qt, pyqtSignal, pyqtSlot
 except:
     print('Unfortunately, your system misses the PyQt5 packages.')
     quit()
 
-# import os
+
 try:
     import odml
 except:
@@ -82,6 +88,9 @@ except:
 
 
 class Main(QtWidgets.QMainWindow):
+
+    sig = pyqtSignal(int)
+
     def __init__(self, app, options=None, parent=None):
         QtWidgets.QMainWindow.__init__(self, parent)
 
@@ -125,6 +134,7 @@ class Main(QtWidgets.QMainWindow):
         self.programmed_stop = False
         self.programmed_stop_datetime = None
         self.start_time = None
+        self.segmentation = None
 
         if options:
             # template selection
@@ -180,6 +190,7 @@ class Main(QtWidgets.QMainWindow):
             self.instant_start = options.instant_start
             if self.instant_start:
                 print('Instant Start: ON')
+
             self.idle_screen = options.idle_screen
             if self.idle_screen:
                 print('Video Display OFF')
@@ -188,6 +199,41 @@ class Main(QtWidgets.QMainWindow):
             if options.color:
                 self.color = True
                 print('Recording in color')
+
+            # programmed stop-time
+            if options.segmentation:
+                try:
+                    a = datetime.strptime(options.segmentation, '%H:%M:%S')
+                    c = datetime(a.year, a.month, a.day, a.hour, a.minute, a.second)
+
+                except ValueError:
+                    pass
+                else:
+                    self.programmed_segmentation = True
+                    self.programmed_segmentation_datetime = c
+
+                if self.programmed_segmentation is not True:
+                    print('Error: allowed stop-time formats are:' '\n"HH:MM:SS" and "YY-mm-dd HH:MM:SS"')
+                    quit()
+                else:
+                    print('Automated segmentation activated: {0:s}'.format(str(self.programmed_segmentation_datetime)))
+
+            if options.recording_length:
+                try:
+                    a = datetime.strptime(options.recording_length, '%H:%M:%S')
+                    c = datetime(a.year, a.month, a.day, a.hour, a.minute, a.second)
+
+                except ValueError:
+                    pass
+                else:
+                    self.programmed_recording_length = True
+                    self.programmed_recording_length_datetime = c
+
+                if self.programmed_recording_length is not True:
+                    print('Error: allowed stop-time formats are:' '\n"HH:MM:SS" and "YY-mm-dd HH:MM:SS"')
+                    quit()
+                else:
+                    print('Automated segmentation activated: {0:s}'.format(str(self.programmed_recording_length_datetime)))
 
         # #######################################
         # LAYOUTS
@@ -474,25 +520,35 @@ class Main(QtWidgets.QMainWindow):
         # CV_FOURCC('P','I','M','1')    = MPEG-1 codec
         if self.trial_counter == 0:
             self.check_data_dir()
-        #trial_name = '%s/trial_%04i' % (self.data_dir, self.trial_counter)
+
         trial_name = '{0:s}/trial_{1:04d}'.format(self.data_dir, self.trial_counter)
         self.tags = list()
-        self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
-                                                           '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
-                                                           cam.get_resolution(),
-                                                           frames_per_second,
-                                                           'mp4v',
-                                                           color=True)
-                                            if not cam.is_raspicam() else
-                                            RasPiVideoRecording('{0}_{1}.h264'.format(trial_name, cam_name),
-                                                                '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
-                                                                'h264',
-                                                                self.cameras[cam_name]))
-                                 for cam_name, cam in self.cameras.items()}
-        # self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.avi'.format(trial_name, cam_name),
+        # self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
+        #                                                    '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
+        #                                                    cam.get_resolution(),
+        #                                                    frames_per_second,
+        #                                                    'mp4v',
+        #                                                    color=True)
+        #                                     if not cam.is_raspicam() else
+        #                                     RasPiVideoRecording('{0}_{1}.h264'.format(trial_name, cam_name),
         #                                                         '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
-        #                                                         self.cameras[cam_name], codec="MJPG"))
+        #                                                         'h264',
+        #                                                         self.cameras[cam_name]))
         #                          for cam_name, cam in self.cameras.items()}
+        """ Ordered dict instead of normal dict to keep cameras in the same order"""
+        self.video_recordings = OrderedDict()
+        for cam_name, cam in self.cameras.items():
+            if cam.is_raspicam():
+                self.video_recordings[cam_name] = RasPiVideoRecording('{0}_{1}.h264'.format(trial_name, cam_name),
+                                                                      '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
+                                                                      'h264', self.cameras[cam_name])
+            else:
+                self.video_recordings[cam_name] = VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
+                                                                  '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
+                                                                  cam.get_resolution(), frames_per_second, 'mp4v',
+                                                                  color=True)
+
+
         print(self.video_recordings)
 
         """ drop timestamp for start or recording """
@@ -636,7 +692,7 @@ class Main(QtWidgets.QMainWindow):
         writer.write_file('{0}/{1}.xml'.format(self.data_dir, trial_name))
 
     def update_video(self):
-        # check for programmed stop-time
+        """ check for programmed stop-time """
         if self.programmed_stop \
                 and self.programmed_stop_datetime < datetime.now():
             self.stop_all_recordings()
@@ -675,6 +731,22 @@ class Main(QtWidgets.QMainWindow):
             timestamp = self.start_time.strftime("%Y-%m-%d  %H:%M:%S")
             time_label = 'start-time: {0:s}   ---  running: {1:s}'.format(timestamp, str(datetime.now() - self.start_time)[:-7])
             self.label_time.setText(time_label)
+
+            """ segmentation for programmed segment length """
+            if datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
+                seconds=self.programmed_segmentation_datetime.second,
+                minutes=self.programmed_segmentation_datetime.minute,
+                hours=self.programmed_segmentation_datetime.hour) <= datetime.now():
+                self.clicked_stop()
+                self.clicked_record()
+
+            """ check for programmed recording length """
+            if datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
+                    seconds=self.programmed_recording_length_datetime.second,
+                    minutes=self.programmed_recording_length_datetime.minute,
+                    hours=self.programmed_recording_length_datetime.hour) <= datetime.now():
+                self.stop_all_recordings()
+                self.app.exit()
 
             # self.write_times_file()
 
@@ -740,10 +812,12 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-t", "--template", action="store", type="string", dest="template", default='continuous_recording_template.xml')
     parser.add_option("-k", "--stop_time", action="store", type="string", dest="stop_time", default='')
+    parser.add_option("-l", "--recording_length", action="store", type="string", dest="recording_length", default='')
     parser.add_option("-o", "--output_directory", action="store", type="string", dest="output_dir", default='')
     parser.add_option("-s", "--instant_start", action="store_true", dest="instant_start", default=False)
     parser.add_option("-i", "--idle_screen", action="store_true", dest="idle_screen", default=False)
     parser.add_option("-c", "--color", action="store_true", dest="color", default=False)
+    parser.add_option("-e", "--segmentation", action="store", dest="segmentation", default='')
     (options, args) = parser.parse_args(args)
 
     # entering the gui app

@@ -61,11 +61,11 @@ class Camera:
         :rtype: dict
         """
         if self.capture is not None:
-            # properties = [e for e in dir(cv2.cv) if "CV_CAP_PROP" in e]
+
             properties = [e for e in dir(cv2) if "CV_CAP_PROP" in e]
             ret = {}
             for e in properties:
-                # ret[e[12:].lower()] = self.capture.get(getattr(cv2.cv, e))
+
                 ret[e[12:].lower()] = self.capture.get(getattr(cv2, e))
             return ret
         else:
