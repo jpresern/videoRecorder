@@ -134,7 +134,7 @@ class Main(QtWidgets.QMainWindow):
         self.programmed_stop = False
         self.programmed_stop_datetime = None
         self.start_time = None
-        self.segmentation = None
+        self.programmed_segmentation = False
         self.programmed_recording_length = False
 
         if options:
