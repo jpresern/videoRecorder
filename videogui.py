@@ -61,7 +61,7 @@ Keyboard Shortcuts:
 # TODO validation of meta data tabs. Warn, if info is missing!
 # TODO: BW (gray scale) support now hacked via tripling the gray scale values to imitate RGB. Probably local codec issue
 # TODO: add sound?
-
+# TODO: add help
 
 # ########################################
 
@@ -123,7 +123,7 @@ class Main(QtWidgets.QMainWindow):
 
         # #######################################
 
-        self.video_recordings = dict()
+        # self.video_recordings = OrderedDict()
 
         # #######################################
         # HANDLE OPTIONS
@@ -135,7 +135,9 @@ class Main(QtWidgets.QMainWindow):
         self.programmed_stop_datetime = None
         self.start_time = None
         self.programmed_segmentation = False
+        self.programmed_segmentation_datetime = None
         self.programmed_recording_length = False
+        self.programmed_recording_length_datetime = False
 
         if options:
             # template selection
@@ -234,8 +236,12 @@ class Main(QtWidgets.QMainWindow):
                     print('Error: allowed stop-time formats are:' '\n"HH:MM:SS" and "YY-mm-dd HH:MM:SS"')
                     quit()
                 else:
-                    print('Automated segmentation activated: {0:s}'.format(str(self.programmed_recording_length_datetime)))
+                    print('Recording length set: {0:s}'.format(str(self.programmed_recording_length_datetime)))
 
+        # self.init_layouts()
+        # self.init_UI_action()
+
+    # def init_layouts(self):
         # #######################################
         # LAYOUTS
         self.main = QtWidgets.QWidget()
@@ -347,6 +353,7 @@ class Main(QtWidgets.QMainWindow):
         # These are necessary to connect GUI elements and instances in various threads.
         # Signals and slots can easily be custom-crafted to meet the needs. Data can be sent easily, too.
 
+    # def init_UI_action(self):
         # connect buttons
         self.button_cancel.clicked.connect(self.clicked_cancel)
         self.button_record.clicked.connect(self.clicked_record)
@@ -524,6 +531,7 @@ class Main(QtWidgets.QMainWindow):
 
         trial_name = '{0:s}/trial_{1:04d}'.format(self.data_dir, self.trial_counter)
         self.tags = list()
+        self.video_recordings = OrderedDict()
         # self.video_recordings = {cam_name: (VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
         #                                                    '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
         #                                                    cam.get_resolution(),
@@ -537,7 +545,6 @@ class Main(QtWidgets.QMainWindow):
         #                                                         self.cameras[cam_name]))
         #                          for cam_name, cam in self.cameras.items()}
         """ Ordered dict instead of normal dict to keep cameras in the same order"""
-        self.video_recordings = OrderedDict()
         for cam_name, cam in self.cameras.items():
             if cam.is_raspicam():
                 self.video_recordings[cam_name] = RasPiVideoRecording('{0}_{1}.h264'.format(trial_name, cam_name),
@@ -740,7 +747,7 @@ class Main(QtWidgets.QMainWindow):
                 hours=self.programmed_segmentation_datetime.hour) <= datetime.now():
                 self.clicked_stop()
                 self.clicked_record()
-
+            #TODO: fix recording_length
             """ check for programmed recording length """
             if self.programmed_recording_length and datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
                     seconds=self.programmed_recording_length_datetime.second,
