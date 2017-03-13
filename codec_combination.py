@@ -7,8 +7,8 @@ import cv2
 __author__ = 'Janez Presern'
 
 codecs = ['mp4v', 'MJPG', 'XVID', 'DIVX', 'h264', 'x264', 'H264', 'X264', 'h265', 'x265', 'H265', 'X265', 'AVC1',
-          'MP4V', 'IYUV', 'PIM1']
-file_types = ['mp4', 'avi', 'mov', 'mkg', 'flv', 'ogg', 'mp4', 'mp4v', 'avc1', 'mpg', 'wmv']
+          'MP4V', 'IYUV', 'PIM1', 'FLV1', 'MSVC']
+file_types = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'ogg', 'mp4', 'mp4v', 'avc1', 'mpg', 'wmv']
 
 
 for codec in codecs:

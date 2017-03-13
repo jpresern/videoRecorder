@@ -135,6 +135,7 @@ class Main(QtWidgets.QMainWindow):
         self.programmed_stop_datetime = None
         self.start_time = None
         self.segmentation = None
+        self.programmed_recording_length = False
 
         if options:
             # template selection
@@ -543,9 +544,9 @@ class Main(QtWidgets.QMainWindow):
                                                                       '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
                                                                       'h264', self.cameras[cam_name])
             else:
-                self.video_recordings[cam_name] = VideoRecording('{0}_{1}.mp4'.format(trial_name, cam_name),
+                self.video_recordings[cam_name] = VideoRecording('{0}_{1}.avi'.format(trial_name, cam_name),
                                                                   '{0}_{1}_metadata.dat'.format(trial_name, cam_name),
-                                                                  cam.get_resolution(), frames_per_second, 'mp4v',
+                                                                  cam.get_resolution(), frames_per_second, 'MJPG',
                                                                   color=True)
 
 
@@ -733,7 +734,7 @@ class Main(QtWidgets.QMainWindow):
             self.label_time.setText(time_label)
 
             """ segmentation for programmed segment length """
-            if datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
+            if self.programmed_segmentation and datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
                 seconds=self.programmed_segmentation_datetime.second,
                 minutes=self.programmed_segmentation_datetime.minute,
                 hours=self.programmed_segmentation_datetime.hour) <= datetime.now():
@@ -741,7 +742,7 @@ class Main(QtWidgets.QMainWindow):
                 self.clicked_record()
 
             """ check for programmed recording length """
-            if datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
+            if self.programmed_recording_length and datetime.strptime(self.record_timestamp, '%Y-%m-%d %H:%M:%S') + timedelta(
                     seconds=self.programmed_recording_length_datetime.second,
                     minutes=self.programmed_recording_length_datetime.minute,
                     hours=self.programmed_recording_length_datetime.hour) <= datetime.now():
