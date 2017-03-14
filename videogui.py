@@ -145,8 +145,8 @@ class Main(QtWidgets.QMainWindow):
                 template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates')
                 optional_template = os.path.join(template_path, options.template)
                 if os.path.exists(optional_template):
-                    default_xml_template = optional_template
-                    print('Template chosen: {0:s}'.format(os.path.basename(default_xml_template)))
+                    self.default_xml_template = optional_template
+                    print('Template chosen: {0:s}'.format(os.path.basename(self.default_xml_template)))
                 else:
                     print('Error: chosen template does not exist')
                     quit()
