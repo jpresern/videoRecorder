@@ -128,7 +128,7 @@ class Main(QtWidgets.QMainWindow):
         # #######################################
         # HANDLE OPTIONS
 
-        default_xml_template = default_template
+        self.default_xml_template = default_template
         self.idle_screen = False
         self.instant_start = False
         self.programmed_stop = False
@@ -242,8 +242,14 @@ class Main(QtWidgets.QMainWindow):
         # self.init_UI_action()
 
     # def init_layouts(self):
+
+        self.init_layout()
+        self.create_menu_bar()
+        self.init_ui_action()
         # #######################################
         # LAYOUTS
+    def init_layout(self):
+
         self.main = QtWidgets.QWidget()
         self.setCentralWidget(self.main)
 
@@ -280,7 +286,7 @@ class Main(QtWidgets.QMainWindow):
 
         # #######################################
         # POPULATE TAB
-        default_template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates', default_xml_template)
+        default_template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates', self.default_xml_template)
         self.populate_metadata_tab(default_template_path)
         self.populate_video_tabs()
         self.populate_controller_tabs()
@@ -319,8 +325,7 @@ class Main(QtWidgets.QMainWindow):
         self.bottom_info_layout.addStretch(0)
 
         # #######################################
-        self.create_menu_bar()
-
+        # self.create_menu_bar()
         # #######################################
         # WORKER THREADS
         # For heavy duty work, which might block the GUI.
@@ -353,7 +358,7 @@ class Main(QtWidgets.QMainWindow):
         # These are necessary to connect GUI elements and instances in various threads.
         # Signals and slots can easily be custom-crafted to meet the needs. Data can be sent easily, too.
 
-    # def init_UI_action(self):
+    def init_ui_action(self):
         # connect buttons
         self.button_cancel.clicked.connect(self.clicked_cancel)
         self.button_record.clicked.connect(self.clicked_record)
