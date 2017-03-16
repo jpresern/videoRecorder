@@ -4,6 +4,7 @@ import sys
 import os
 import glob
 import numpy as np
+import argparse
 from IPython import embed
 from collections import OrderedDict
 from optparse import OptionParser
@@ -16,7 +17,7 @@ from RasPiCamControllerTab import RasPiCamControllerTab
 from Camera import Camera, bgr2rgb, bgr2grayscale
 from default_config import default_template, camera_device_search_range, camera_name_format, frames_per_second, \
     width, height, max_tab_width, min_tab_width, offset_left, offset_top
-from doc import doc
+from doc import doc, details
 
 
 # from PIL import Image as image
@@ -238,10 +239,6 @@ class Main(QtWidgets.QMainWindow):
                 else:
                     print('Recording length set: {0:s}'.format(str(self.programmed_recording_length_datetime)))
 
-        # self.init_layouts()
-        # self.init_UI_action()
-
-    # def init_layouts(self):
 
         self.init_layout()
         self.create_menu_bar()
@@ -818,20 +815,21 @@ class Main(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
 
-    args = sys.argv
-    to_be_parsed = args[1:]
+    # args = sys.argv
+    # to_be_parsed = args[1:]
 
-    # define options parser
-    parser = OptionParser()
-    parser.add_option("-t", "--template", action="store", type="string", dest="template", default='continuous_recording_template.xml')
-    parser.add_option("-k", "--stop_time", action="store", type="string", dest="stop_time", default='')
-    parser.add_option("-l", "--recording_length", action="store", type="string", dest="recording_length", default='')
-    parser.add_option("-o", "--output_directory", action="store", type="string", dest="output_dir", default='')
-    parser.add_option("-s", "--instant_start", action="store_true", dest="instant_start", default=False)
-    parser.add_option("-i", "--idle_screen", action="store_true", dest="idle_screen", default=False)
-    parser.add_option("-c", "--color", action="store_true", dest="color", default=False)
-    parser.add_option("-e", "--segmentation", action="store", dest="segmentation", default='')
-    (options, args) = parser.parse_args(args)
+    """ define option parser"""
+    parser = argparse.ArgumentParser(description=doc, epilog=details,
+                                formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("--template", "-t", action="store", type=str, dest="template", default="bee_pollination_template.xml")
+    parser.add_argument("--stop_time", "-k", action="store", type=str, dest="stop_time", default="")
+    parser.add_argument("--recording_length", "-l", action="store", type=str, dest="recording_length", default="")
+    parser.add_argument("--output_directory", "-o", action="store", type=str, dest="output_dir", default="")
+    parser.add_argument("--instant_start", "-s", action="store_true", dest="instant_start", default=False)
+    parser.add_argument("--idle_screen", "-i", action="store_true", dest="idle_screen", default=False)
+    parser.add_argument("--color", "-c", action="store_true", dest="color", default=False)
+    parser.add_argument("--segmentation", "-e", action="store", dest="segmentation", default="")
+    options = parser.parse_args()
 
     # entering the gui app
     qapp = QtWidgets.QApplication(sys.argv)  # create the main application
